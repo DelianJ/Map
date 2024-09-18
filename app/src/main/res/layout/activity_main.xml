@@ -25,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:text="20.591180"
                 android:autofillHints=""
                 android:ems="10"
                 android:hint="@string/latitude"
@@ -36,6 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:text="-100.382995"
                 android:autofillHints=""
                 android:ems="10"
                 android:hint="@string/longitude"
@@ -57,5 +59,15 @@
             android:layout_margin="0dp"/>
 
     </LinearLayout>
+
+    <com.example.openstreetmap.ui.UIInfoRutaconstructor
+        android:id="@+id/ui_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="110dp"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

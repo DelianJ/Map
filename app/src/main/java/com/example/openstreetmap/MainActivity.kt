@@ -1,15 +1,21 @@
 package com.example.openstreetmap
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.icu.text.DecimalFormat
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.os.Looper
 import android.os.StrictMode
 import android.preference.PreferenceManager
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.openstreetmap.databinding.ActivityMainBinding
+import com.example.openstreetmap.manejoMapa.ManejoMapa
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
@@ -17,20 +23,15 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.osmdroid.bonuspack.routing.Road
-import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapController
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.compass.CompassOverlay
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -43,15 +44,11 @@ class MainActivity : AppCompatActivity() {
     )
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mapController: MapController
-    private lateinit var road: Road
-    private var roadManager =  OSRMRoadManager(this, "raod")
-    private lateinit var mCompassOverlay: CompassOverlay
-    private lateinit var mrotateionOverlay: RotationGestureOverlay
-    private lateinit var mLocationOverlay:MyLocationNewOverlay
-    private lateinit var roadOverlay: Polyline
 
     private var geoUbicacion = GeoPoint(0.0, 0.0)
+    private var manejoMapa: ManejoMapa = ManejoMapa()
+    private val df: DecimalFormat = DecimalFormat("#.00")
+    private lateinit var road: Road
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,38 +73,29 @@ class MainActivity : AppCompatActivity() {
 
         solicitarActualizacionUbicacion()
         initUI()
-        initMap()
+        manejoMapa.initMap(binding.map)
     }
 
     fun initUI(){
         binding.btNavegate.setOnClickListener {
-            getRoad()
+            hideKeyboard()
+            val endPoint = GeoPoint(binding.etLatitude.text.toString().toDouble(),
+                binding.etLongitude.text.toString().toDouble())
+            CoroutineScope(Dispatchers.IO).launch {
+                road = manejoMapa.getRoad(geoUbicacion,endPoint, binding.map)
+                mostrarInfo(road)
+            }
+            binding.etLatitude.isEnabled = false
+            binding.etLongitude.isEnabled = false
+            binding.uiInfo.visibility = View.VISIBLE
         }
     }
 
-    private fun initMap() {
-        binding.map.setTileSource(TileSourceFactory.MAPNIK)
-        mapController = binding.map.controller as MapController
-        mapController.setCenter(geoUbicacion)
-        mapController.setZoom(18)
-        binding.map.setMultiTouchControls(true)
-
-        binding.map
-
-        mCompassOverlay = CompassOverlay(binding.map.context,
-            InternalCompassOrientationProvider(binding.map.context), binding.map)
-        mCompassOverlay.enableCompass()
-        mCompassOverlay.mOrientationProvider
-
-        mrotateionOverlay = RotationGestureOverlay(binding.map)
-        mrotateionOverlay.isEnabled
-
-        mLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), binding.map)
-        mLocationOverlay.enableMyLocation()
-        mLocationOverlay.enableFollowLocation()
-        binding.map.overlays.add(mLocationOverlay)
-        binding.map.overlays.add(mCompassOverlay)
-        binding.map.overlays.add(mrotateionOverlay)
+    @SuppressLint("SetTextI18n")
+    fun mostrarInfo(road: Road){
+        println("----------${road.mLength}-------------")
+        binding.uiInfo.setTextDistancia("${df.format(road.mLength)}Km")
+        binding.uiInfo.setTextTiempoEstimado("${tiempoEstimado(road.mDuration)}HH:mm:ss")
     }
 
     private fun solicitarActualizacionUbicacion() {
@@ -149,27 +137,27 @@ class MainActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions( this, permisos, 1)
     }
 
-    fun getRoad(){
-        val lat = binding.etLatitude.text.toString().toDouble()
-        val long = binding.etLongitude.text.toString().toDouble()
-        val wayPoints = ArrayList<GeoPoint>()
-        val endPoint = GeoPoint(lat, long)
-        wayPoints.add(geoUbicacion)
-        wayPoints.add(endPoint)
-
-        road = roadManager.getRoad(wayPoints)
-        roadOverlay = RoadManager.buildRoadOverlay(road)
-        binding.map.overlays.add(roadOverlay)
-        setMarket(endPoint)
-    }
-
     private fun setMarket(endpoint: GeoPoint){
         val marker = Marker(binding.map)
         marker.position = endpoint
-        marker.icon = ContextCompat.getDrawable(this, org.osmdroid.bonuspack.R.drawable.marker_default)
+        marker.icon = ContextCompat.getDrawable(this, org.osmdroid.bonuspack.R.drawable.center)
         marker.title = "EndPoint"
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         binding.map.overlays.add(marker)
         binding.map.invalidate()
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun tiempoEstimado(segundos: Double): String{
+        val tiempo = TimeUnit.SECONDS.toMillis(segundos.toLong())
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = tiempo
+        val time = SimpleDateFormat("HH:mm:ss")
+        return time.format(calendar.time)
+    }
+
+    private fun hideKeyboard(){
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.main.windowToken, 0)
     }
 }

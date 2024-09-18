@@ -3,4 +3,8 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="navegate">Navegate</string>
+    <string name="calculando">Calculando...</string>
+    <string name="tiempo_estimado">Tiempo Estimado</string>
+    <string name="distancia_estimada">Distancia Estimada</string>
+    <string name="nueva_ruta">Nueva Ruta</string>
 </resources>

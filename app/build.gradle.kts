@@ -57,7 +57,7 @@ dependencies {
     implementation (libs.gson)
     implementation (libs.okhttp)
     implementation(fileTree(mapOf(
-        "dir" to "D:\\proyectos\\android\\otros\\OpenStreetmap\\app\\libs",
+        "dir" to "libs",
         "include" to listOf("*.aar", "*.jar")
     )))
 }
