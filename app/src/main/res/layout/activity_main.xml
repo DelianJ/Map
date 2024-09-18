@@ -25,9 +25,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:text="20.588750"
+                android:autofillHints=""
                 android:ems="10"
-                android:hint="Latitude"
+                android:hint="@string/latitude"
                 android:inputType="text" />
 
             <EditText
@@ -36,9 +36,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:text="-100.411215"
+                android:autofillHints=""
                 android:ems="10"
-                android:hint="Longitude"
+                android:hint="@string/longitude"
                 android:inputType="text" />
 
             <Button
@@ -47,7 +47,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Navegate" />
+                android:text="@string/navegate" />
         </LinearLayout>
 
         <org.osmdroid.views.MapView

@@ -1,8 +1,6 @@
 package com.example.openstreetmap
 
 import android.Manifest
-import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
@@ -54,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var roadOverlay: Polyline
 
     private var geoUbicacion = GeoPoint(0.0, 0.0)
-    val PREFS_NAME: String = "org.andnav.osm.prefs"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
