@@ -31,6 +31,7 @@ class ManejoMapa {
     private lateinit var mrotateionOverlay: RotationGestureOverlay
     private lateinit var mLocationOverlay:MyLocationNewOverlay
     private lateinit var roadOverlay: Polyline
+    private lateinit var marker: Marker
     private val df: DecimalFormat = DecimalFormat("#.00")
 
     fun initMap(map: MapView): MapView {
@@ -73,7 +74,7 @@ class ManejoMapa {
     }
 
     fun setMarket(endpoint: GeoPoint, map: MapView){
-        val marker = Marker(map)
+        marker = Marker(map)
         marker.position = endpoint
         marker.icon = ContextCompat.getDrawable(map.context, org.osmdroid.bonuspack.R.drawable.center)
         marker.title = "EndPoint"
@@ -89,5 +90,10 @@ class ManejoMapa {
         calendar.timeInMillis = tiempo
         val time = SimpleDateFormat("HH:mm:ss")
         return time.format(calendar.time)
+    }
+
+    fun limpiaMapa(map: MapView) {
+        map.overlays.remove(roadOverlay)
+        map.overlays.remove(marker)
     }
 }

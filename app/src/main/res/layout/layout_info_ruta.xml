@@ -46,6 +46,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lv_distancia"/>
     <Button
+        android:id="@+id/btn_nuevaNuta"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="5dp"

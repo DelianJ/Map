@@ -19,4 +19,5 @@ class UIInfoRutaconstructor @JvmOverloads constructor(
     fun setTextDistancia(text: String){
         bindingInfoRuta.txDistanciaEstimado.text = text
     }
+
 }
